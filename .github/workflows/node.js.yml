@@ -30,7 +30,7 @@ jobs:
     - run: ls -l
     - run: cd nodejs
     - run: ls -l
-    - run: npm ci
+    - run: cd nodejs && npm ci
     - run: cd ..
     - run: zip -r nodejs.zip nodejs
     - run: aws cp nodejs.zip s3://
