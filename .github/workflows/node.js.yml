@@ -30,3 +30,11 @@ jobs:
     - run: npm ci
     - run: cd ..
     - run: zip -r nodejs.zip nodejs
+    - run: aws cp nodejs.zip s3://
+    - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-region: eu-west-1
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/GitHubActionsRole
+    - name: Upload to S3
+      run: aws s3 cp nodejs.zip s3://${{ secrets.S3_BUCKET }}
