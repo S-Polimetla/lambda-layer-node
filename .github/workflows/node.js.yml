@@ -40,3 +40,7 @@ jobs:
         role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/GitHubActionsRole
     - name: Upload to S3
       run: aws s3 cp nodejs.zip s3://${{ secrets.S3_BUCKET }}
+    - name: install cfn create or update
+      run: npm install -g cfn-create-or-update
+    - name: Create a cloudformation stack
+      run: cfn-create-or-update --stack-name lambda-layer --template-body file://template.yml

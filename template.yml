@@ -1,0 +1,17 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Template to create CodePipeline to build and deploy a Spring boot application as a docker container on ECS
+
+Resources:
+
+  MyLayer:
+    Type: AWS::Lambda::LayerVersion
+    Properties:
+      CompatibleRuntimes:
+        - nodejs18.x
+        - nodejs16.x
+      Content:
+        S3Bucket: de.polimetla.terraform-learning
+        S3Key: nodejs.zip
+      Description: My layer
+      LayerName: NewNodeLayer
+      LicenseInfo: MIT
