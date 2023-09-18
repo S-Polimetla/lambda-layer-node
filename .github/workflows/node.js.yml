@@ -1,46 +1,35 @@
-# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
-
-name: Node.js CI
+name: AWS deploy CI/CD
 
 on:
   push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+    branches: [ main ]
 
 permissions:
   id-token: write
   contents: read
 
 jobs:
-  build:
+  buildAndDeploy:
 
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
         node-version: [18.x]
-        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
-
+        
     steps:
-    - uses: actions/checkout@v3
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-        cache-dependency-path: nodejs/package-lock.json    
-    - run: cd nodejs && npm ci    
-    - run: zip -r nodejs.zip nodejs    
-    - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-region: eu-west-1
-        role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/GitHubActionsRole
-    - name: Upload to S3
-      run: aws s3 cp nodejs.zip s3://${{ secrets.S3_BUCKET }}
-    - name: install cfn create or update
-      run: npm install -g cfn-create-or-update
-    - name: Create a cloudformation stack
-      run: cfn-create-or-update --stack-name lambda-layer --template-body file://template.yml
+      - name: Git clone the repository
+        uses: actions/checkout@v3
+      - name: Set up Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: cd nodejs && npm i
+      - run: npm ci
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-region: eu-west-1
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/GitHubActionsRole
+      - name: Deploy to Lambda
+        run: npm run deploy -- --param="S3_BUCKET=${{ secrets.S3_BUCKET }}" 

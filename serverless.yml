@@ -1,0 +1,10 @@
+service: layers
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: eu-west-1
+
+layers:
+  test:
+    path: test
